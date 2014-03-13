@@ -1,0 +1,9 @@
+Building piCoin
+
+See doc/readme-qt.rst for instructions on building piCoin-qt,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of piCoin.
+
+See doc/build-*.txt for instructions on building piCoin,
+the intended-for-services, no-graphical-interface, reference
+implementation of piCoin.
