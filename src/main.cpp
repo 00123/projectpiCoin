@@ -838,6 +838,7 @@ int64 static GetBlockValue(int nHeight, int64 nFees)
 static const int64 nTargetTimespan = 314; // piCoin: Every block
 static const int64 nTargetSpacing = 314; // piCoin: 314 second blocks
 static const int64 nInterval = nTargetTimespan / nTargetSpacing;
+static const int64 KGWInterval = 12;
 
 static const int64 nReTargetHistoryFact = 4; // look at 4 times the retarget
                                              // interval into the block history
@@ -945,6 +946,10 @@ unsigned int static GetNextWorkRequired_V1(const CBlockIndex* pindexLast, const 
 }
 
 unsigned int static KimotoGravityWell(const CBlockIndex* pindexLast, const CBlock *pblock, uint64 TargetBlocksSpacingSeconds, uint64 PastBlocksMin, uint64 PastBlocksMax) {
+
+  // KGW every 12 blocks
+  if ((pindexLast->nHeight+1) % KGWInterval != 0) {return pindexLast->nBits;}
+
         /* current difficulty formula, megacoin - kimoto gravity well */
         const CBlockIndex *BlockLastSolved = pindexLast;
         const CBlockIndex *BlockReading = pindexLast;
@@ -996,10 +1001,10 @@ unsigned int static KimotoGravityWell(const CBlockIndex* pindexLast, const CBloc
     if (bnNew > bnProofOfWorkLimit) { bnNew = bnProofOfWorkLimit; }
         
     /// debug print
-    printf("Difficulty Retarget - Kimoto Gravity Well\n");
-    printf("PastRateAdjustmentRatio = %g\n", PastRateAdjustmentRatio);
-    printf("Before: %08x %s\n", BlockLastSolved->nBits, CBigNum().SetCompact(BlockLastSolved->nBits).getuint256().ToString().c_str());
-    printf("After: %08x %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
+//    printf("Difficulty Retarget - Kimoto Gravity Well\n");
+//    printf("PastRateAdjustmentRatio = %g\n", PastRateAdjustmentRatio);
+//    printf("Before: %08x %s\n", BlockLastSolved->nBits, CBigNum().SetCompact(BlockLastSolved->nBits).getuint256().ToString().c_str());
+//    printf("After: %08x %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
         
         return bnNew.GetCompact();
 }
@@ -1008,8 +1013,8 @@ unsigned int static GetNextWorkRequired_V2(const CBlockIndex* pindexLast, const 
 {
         static const int64 BlocksTargetSpacing = 40; // seconds
         unsigned int TimeDaySeconds = 60 * 60 * 24;
-        int64 PastSecondsMin = TimeDaySeconds * 0.0185;
-        int64 PastSecondsMax = TimeDaySeconds * 0.23125;
+        int64 PastSecondsMin = TimeDaySeconds * 0.25;
+        int64 PastSecondsMax = TimeDaySeconds * 7;
         uint64 PastBlocksMin = PastSecondsMin / BlocksTargetSpacing;
         uint64 PastBlocksMax = PastSecondsMax / BlocksTargetSpacing;
         
@@ -1023,7 +1028,7 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
                 if (pindexLast->nHeight+1 >= 50) { DiffMode = 2; }
         }
         else {
-                if (pindexLast->nHeight+1 >= 35000) { DiffMode = 2; }
+                if (pindexLast->nHeight+1 >= 720) { DiffMode = 2; }
         }
         
         if (DiffMode == 1) { return GetNextWorkRequired_V1(pindexLast, pblock); }
